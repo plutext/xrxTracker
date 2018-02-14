@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>xrxTracker</description>
+    <author>jason@plutext.org</author>
+    <website/>
+    <status>alpha</status>
+    <license>GNU-LGPL</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>xrxTracker</target>
+    <prepare>pre-install.xql</prepare>
+    <finish/>
+<deployed>2018-02-04T15:41:56.699+11:00</deployed>
+</meta>
