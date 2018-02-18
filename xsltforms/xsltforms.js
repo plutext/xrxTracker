@@ -11664,7 +11664,7 @@ XsltForms_upload.contents = {};
 		
 
 XsltForms_upload.prototype.clone = function(id) { 
-	return new XsltForms_input(this.subform, id, this.valoff, this.binding, this.incremental, this.filename, this.mediatype, this.bolAidButton, true);
+	return new XsltForms_upload(this.subform, id, this.valoff, this.binding, this.incremental, this.filename, this.mediatype, this.bolAidButton, true);
 };
 
 
@@ -11749,13 +11749,18 @@ XsltForms_upload.prototype.directclick = function() {
 		
 
 XsltForms_upload.prototype.change = function() {
+    /*
 	if (this.type.nsuri !== "http://www.w3.org/2001/XMLSchema" || (this.type.name !== "anyURI" && this.type.name !== "base64Binary" && this.type.name !== "hexBinary")) {
 		alert("Unexpected type for upload control: " + this.type.nsuri + " " + this.type.name);
 		throw "Error";
-	} else {
+	} else 
+	*/    
+	    {
 		var filename = "unselected";
 		var content = "";
 		var xf = this;
+		// JBH
+		xf.type.name="base64Binary";
 		try {
 			var fr = new FileReader();
 			var file = xf.input.files[0];
