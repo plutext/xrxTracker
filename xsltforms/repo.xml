@@ -1,0 +1,12 @@
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>This library contains revision 594 of XSLTForms, from 2014-04-16.</description>
+    <author>Alain Couthures</author>
+    <website>http://www.agencexml.com/xsltforms</website>
+    <status>alpha</status>
+    <license>GNU-LGPL</license>
+    <copyright>true</copyright>
+    <type>library</type>
+    <target>xsltforms</target>
+    <finish/>
+<deployed>2018-02-17T16:20:13.037+11:00</deployed>
+</meta>
