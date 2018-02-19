@@ -17,7 +17,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare option output:indent "yes";
 
 (:  declare variable $issues:data := $config:app-root || "/data/issues"; :)
-declare variable $issues:data := "/db/apps/issues1/data/issues"; 
+declare variable $issues:data := "/db/apps/xrxTracker/data/issues"; 
 
 (:   console:log("Hello world!") :)
 
@@ -34,7 +34,7 @@ function issues:issues() {
     {
         (: for $issue in collection($config:app-root || "/data/issues")/issue :)
         let $log := util:log("INFO", "\nissues invokved\n ")
-        for $issue in collection("/db/apps/issues1/data/issues")/issue 
+        for $issue in collection("/db/apps/xrxTracker/data/issues")/issue 
         return
             $issue
     }
@@ -56,7 +56,7 @@ function issues:issues() {
 (:};:)
 
 (:~
- : Retrieve an issue identified by uuid.
+ : Retrieve an issue identified by id.
  :)
 declare 
     %rest:GET
@@ -66,7 +66,7 @@ function issues:get-issue($id as xs:string*) {
 };
 
 (:~
- : Search issuees using a given field and a (lucene) query string.
+ : Search issues using a given field and a (lucene) query string.
  :)
 declare 
     %rest:GET
@@ -101,7 +101,7 @@ declare
     %rest:path("/issue")
 function issues:create-or-edit-issue($content as node()*) {
        console:log("put"),
-    let $id := count(collection("/db/apps/issues1/data/issues")/issue)+1
+    let $id := count(collection("/db/apps/xrxTracker/data/issues")/issue)+1
   (: let $id := ($content/issue/@id, util:uuid())[1] :)
   (: copy the attributes otherwise lost below :)
   let $assignee := $content/issue/@assignee
@@ -138,11 +138,7 @@ function issues:create-or-edit-issue($content as node()*) {
                 <placeholder>placeholder</placeholder>
             </comments> 
   
-    (: <file filename="invoice.docx" 
-            mediatype="application/vnd.openxmlformats-officedocument.wordprocessingml.document" size="">
-            %2Fexist%2Fupload%2F1518329585457%2Finvoice.docx</file> :)
-    (: let $foo := util:log('INFO', 
-                    util:unescape-uri($uri, "UTF-8")   ) :)
+                    
     let $newAttachment := f:node-to-db($content/issue/files/file, $id, string(count($content/issue/attachments/*)+1) ) 
 
     

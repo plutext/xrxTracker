@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project default="xar" name="issues1">
+<project default="xar" name="xrxTracker">
     <xmlproperty file="expath-pkg.xml"/>
     <property name="project.version" value="${package(version)}"/>
-    <property name="project.app" value="issues1"/>
+    <property name="project.app" value="xrxTracker"/>
     <property name="build.dir" value="build"/>
     <target name="xar">
         <mkdir dir="${build.dir}"/>
