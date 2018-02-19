@@ -15,11 +15,28 @@ if ($exist:path eq '') then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
         <redirect url="{request:get-uri()}/"/>
     </dispatch>
+
+else if ($exist:path eq "/xrxTracker-xsltforms.xhtml") then
+
+    <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+       <view>
+          <forward servlet="XSLTServlet">
+             (: Apply xsltforms.xsl stylesheet :)
+             <set-attribute name="xslt.stylesheet" value="http://localhost:8080/exist/rest/db/apps/xrxTracker/xsltforms/xsltforms.xsl"/>
+             <set-attribute name="xslt.output.omit-xml-declaration" value="yes"/>
+             <set-attribute name="xslt.output.indent" value="no"/>
+             <set-attribute name="xslt.output.media-type" value="text/html"/>
+             <set-attribute name="xslt.output.method" value="xhtml"/>
+             <set-attribute name="xslt.baseuri" value="xsltforms/"/>
+          </forward>
+       </view>
+       <cache-control cache="no"/>
+    </dispatch>
     
 else if ($exist:path eq "/") then
     (: forward root path to index.xql :)
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <redirect url="index.xhtml?restxq={request:get-context-path()}/restxq/"/>
+        <redirect url="xrxTracker-betterFORM.xhtml?restxq={request:get-context-path()}/restxq/"/>
     </dispatch>
     
 else if (ends-with($exist:resource, ".html")) then
