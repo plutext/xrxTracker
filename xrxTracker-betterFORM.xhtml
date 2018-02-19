@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xf="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xf="http://www.w3.org/2002/xforms">
 <head>
         <title>xrxTracker, an XForm based issue tracker in eXist</title>
 </head>
@@ -35,9 +34,16 @@
         <xf:instance xmlns="" id="new-comment">
             <comment isNew="true">new</comment>
         </xf:instance>
-        
+
+        <xf:instance xmlns="" id="URL-container">
+            <URL/>
+        </xf:instance>
+            
         <xf:bind id="issue-id" nodeset="//issue/@id" relevant="true()"/>
         <xf:bind nodeset="//issue[index('issue-repeat')]/files/file[1]" type="xs:anyURI"/>
+        <!--
+        <xf:bind nodeset="//issue[index('issue-repeat')]/attachments/attachment[index('attachment-repeat')]" relevant="blagh"/>
+-->
 
         <xf:submission id="load" resource="{$restxq}issue" method="get" replace="instance">
             <xf:message ev:event="xforms-submit-done" level="ephemeral">issue list loaded.</xf:message>
@@ -48,6 +54,11 @@
             <xf:message ev:event="xforms-submit-error" level="ephemeral">An error occurred.</xf:message>
         </xf:submission>
 
+<!-- Doesn't work
+       <xf:submission id="docx" resource="{$restxq}docx" method="get"
+          ref="//issue[index('issue-repeat')]/attachments/attachment[index('attachment-repeat')]/@filename"
+              replace="all" />
+    -->      
 <!-- issue deletion not allowed; would break our simple IDs        
         <xf:submission id="delete" resource="{$restxq}issue/{instance('all')//issue[index('issue-repeat')]/@id}" method="delete" replace="instance">
             <xf:message ev:event="xforms-submit-done" level="ephemeral">issue deleted.</xf:message>
@@ -150,6 +161,7 @@
                     <th>resolution</th>
                 </thead>
                 <tbody id="issue-repeat" xf:repeat-nodeset="//issue">
+                <!-- Orbeon needs an xf:repeat element instead -->
                     <tr>
                         <td>
                             <xf:output ref="@component"/>
@@ -339,18 +351,41 @@
                     </xf:trigger>
                 
                 <!-- end comments stuff -->
-                
+
+
+          
+          
                 <!-- attachments 
                 
-                        <attachments>
-                            <attachment filename="21_2010-sample1-1.docx" mediatype="application/vnd.openxmlformats-officedocument.wordprocessingml.document" timestamp="1518571483673"/>
-                        </attachments>                
+        <attachment filename="38_decracdiscrim1-1" mediatype="application/vnd.openxmlformats-officedocument.wordprocessingml.document" timestamp="1518647465960" storedAs="entries"/>
                         -->
                 <ul>
                     <xf:repeat nodeset="//issue[index('issue-repeat')]/attachments/attachment" id="attachment-repeat">
                         <li>
                                     <xf:output ref="./@filename"/>
-                                </li>
+                            <xf:group ref=".[@storedAs='entries']">
+                               <!-- see https://en.wikibooks.org/wiki/XForms/Output_and_Links -->
+                               
+                               <!-- Doesn't work
+                               <xf:submit submission="docx" appearance="minimal" class="url">
+                                    <xf:label><xf:output ref="./@filename"/></xf:label>
+                               </xf:submit>     
+                               -->
+                               
+                               <!-- works in both betterForm and orbeon -->
+                                <xf:trigger submission="replace-form-with" appearance="minimal" class="url">
+                                    <xf:label>
+                                        <xf:output ref="./@filename"/>
+                                    </xf:label>
+                                    <xf:action ev:event="DOMActivate">
+                                        <xf:setvalue ref="instance('URL-container')" value="concat('http://127.0.0.1:8080/exist/restxq/docx/',                                          instance('all')/issue[index('issue-repeat')]/attachments/attachment/@filename)"/>
+                                        <xf:load ref="instance('URL-container')"/>
+                                    </xf:action>
+                                </xf:trigger>                               
+                               
+                               
+                            </xf:group>
+                        </li>
                         
                     </xf:repeat>
                 </ul>    
