@@ -7,6 +7,7 @@ The issues are stored in eXist.
 
 ## Issue XML format
 
+For an idea of this, see https://github.com/plutext/xrxTracker/blob/master/xrxTracker-xsltforms.xhtml#L34
 
 ## Motivation and Features
 
@@ -54,8 +55,8 @@ Since these all require slightly differing XForms, the current approach is to ha
 XForm for each implementation:
 
 * xrxTracker-betterFORM.xhtml
-* xrxTracker-Orbeon.xhtml
-* xrxTracker-xsltforms.xhtml
+* xrxTracker-Orbeon.xhtml, https://github.com/plutext/xrxTracker/blob/master/client-Orbeon/xforms-xrxTracker/xrxTracker-Orbeon.xhtml
+* xrxTracker-xsltforms.xhtml, https://github.com/plutext/xrxTracker/blob/master/xrxTracker-xsltforms.xhtml
 
 ### betterForm
 
@@ -117,6 +118,8 @@ if ($exist:path eq "/xrxTracker-xsltforms.xhtml") then
 You might need to register modules:
 
 ```
+    import module namespace restxqex = "http://exquery.org/ns/restxq/exist";
+
     restxqex:register-module(xs:anyURI('/db/apps/xrxTracker/modules/xrxTracker.xql'))
 
     restxqex:register-module(xs:anyURI('/db/apps/xrxTracker/modules/mvfile.xqm'))
