@@ -1,0 +1,361 @@
+<?xsltforms-options debug="yes"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xf="http://www.w3.org/2002/xforms" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ev="http://www.w3.org/2001/xml-events" xsd:dummy="Help the poor user of Mozilla evade the Mozilla namespace curse" xsi:dummy="Help the poor user of Mozilla evade the Mozilla namespace curse" ev:dummy="Help the poor user of Mozilla evade the Mozilla namespace curse">
+<head>
+        <title>xrxTracker, an XForm based issue tracker in eXist</title>
+</head>
+<body>
+
+<!--
+
+Patch XSLTForms works as a proof of concept, using Chrome. (How to pass the original filename?)
+
+
+In Firefox, I get "Error dispatching event 'xforms-model-construct' : xforms-link-exception" and then the "New" button doesn't work.
+
+In Chrome, the "new" button works to a point:
+
+- if the template contains  <file filename="" mediatype="" size=""   >content</file>
+  then the upload control appears, but gives "Unexpected type for upload control" error when you try to use it
+  
+- if the template contains an xsi:type attribute, eg <file filename="" mediatype="" size="" xsi:type="xsd:anyURI"  >content</file> then that element is not copied when you press the "new" button.
+
+  Editing xsltforms.js at line 11763, hexBinary or base64Binary works
+  The other (~anyURI) results in something like: file://docProps.docx?id=xsltforms-mainform-upload-32_12_2_4_2_4_2_ which isn't useful.
+  
+  
+-->
+<div>
+
+    <xf:model>
+        <xf:instance xmlns="" id="all">
+            <issues/>
+        </xf:instance>
+        <xf:instance xmlns="" id="template">
+            <issue id="NEW" isNew="true" assignee="developer1" component="cross-component" type="bug" priority="medium" status="open" milestone="mvp">
+                <title>title</title>
+                <summary>summary</summary>
+                <reproduce>reproduce</reproduce>
+                <resolution>resolution</resolution>
+                <comments>
+                    <!-- <comment>initial comment is populated server-side from summary</comment> -->
+                    <placeholder>placeholder</placeholder>
+                </comments>
+                  <files>
+                    <file filename="" mediatype="" size="">content</file>
+                  </files>
+                  <attachments/>
+            </issue>
+        </xf:instance> 
+        <xf:instance xmlns="" id="search">
+            <parameters>
+                <query/>
+                <field>title</field>
+            </parameters>
+        </xf:instance>
+        <xf:instance xmlns="" id="new-comment">
+            <comment isNew="true">new</comment>
+        </xf:instance>
+
+        <xf:instance xmlns="" id="URL-container">
+            <URL/>
+        </xf:instance>
+            
+        <xf:bind id="issue-id" nodeset="//issue/@id" relevant="true()"/>
+        <xf:bind nodeset="//issue[index('issue-repeat')]/files/file[1]" type="xs:anyURI"/>
+        <!--
+        <xf:bind nodeset="//issue[index('issue-repeat')]/attachments/attachment[index('attachment-repeat')]" relevant="blagh"/>
+-->
+
+        <xf:submission id="load" resource="http://localhost:8080/exist/restxq/issue" method="get" replace="instance">
+            <xf:message ev:event="xforms-submit-done" level="ephemeral">issue list loaded.</xf:message>
+        </xf:submission>
+        
+        <xf:submission id="save" resource="http://localhost:8080/exist/restxq/issue" method="put" replace="instance" ref="//issue[index('issue-repeat')]">
+            <xf:message ev:event="xforms-submit-done" level="ephemeral">issue saved.</xf:message>
+            <xf:message ev:event="xforms-submit-error" level="ephemeral">An error occurred.</xf:message>
+        </xf:submission>
+
+<!-- Doesn't work
+       <xf:submission id="docx" resource="{$restxq}docx" method="get"
+          ref="//issue[index('issue-repeat')]/attachments/attachment[index('attachment-repeat')]/@filename"
+              replace="all" />
+    -->      
+<!-- issue deletion not allowed; would break our simple IDs        
+        <xf:submission id="delete" resource="{$restxq}issue/{instance('all')//issue[index('issue-repeat')]/@id}" method="delete" replace="instance">
+            <xf:message ev:event="xforms-submit-done" level="ephemeral">issue deleted.</xf:message>
+            <xf:message ev:event="xforms-submit-error" level="ephemeral">An error occurred.</xf:message>
+        </xf:submission>
+        -->
+        
+        <xf:submission id="search" resource="{$restxq}search" method="get" serialization="application/x-www-form-urlencoded" ref="instance('search')" targetref="instance('all')" replace="instance"/>
+        <xf:action ev:event="xforms-ready">
+            <xf:send submission="load"/>
+        </xf:action>
+    </xf:model>
+    <div class="row">
+        <div id="content" class="col-md-8">
+            <div class="page-header">
+                <h1>xrxTracker</h1>
+            </div>
+            
+
+            
+            <!-- Summary Table -->
+            <h2>Summary table</h2>
+            <table class="issues table table">
+                <thead>
+                    <th>Component</th>
+                    <th>Status</th>
+                    <th>Assignee</th>
+                    <th>ID</th>
+                    <th>type</th>
+                    <th>milestone</th>
+                    <th>priority</th>
+                    <th>title</th>
+                    <th>summary</th>
+                    <th>resolution</th>
+                </thead>
+                <tbody>
+                <xf:repeat id="issue-repeat" ref="issue">
+                    <tr>
+                        <td>
+                            <xf:output ref="@component"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@status"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@assignee"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@id"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@type"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@milestone"/>
+                        </td>
+                        <td>
+                            <xf:output ref="@priority"/>
+                        </td>
+                        <td>
+                            <xf:output ref="title"/>
+                        </td>
+                        <td>
+                            <xf:output ref="summary"/>
+                        </td>
+                        <td>
+                            <xf:output ref="resolution"/>
+                        </td>
+                    </tr>
+                    </xf:repeat>
+                </tbody>
+            </table>
+            <xf:group appearance="minimal" class="action-buttons">
+            <!--
+                <xf:submit submission="delete">
+                    <xf:label>Delete</xf:label>
+                </xf:submit>
+                -->
+                <xf:trigger>
+                    <xf:label>New</xf:label>
+                        <xf:insert ev:event="DOMActivate" context="instance('all')" nodeset="//issue" at="last()" position="after" origin="instance('template')"/>                        
+                </xf:trigger>
+            </xf:group>
+
+            <!-- Details on indexed issue -->
+            <h2>Issue details</h2>
+            <xf:group ref="//issue[index('issue-repeat')]" appearance="full" class="edit">
+                <xf:input ref="title">
+                    <xf:label>title:</xf:label>
+                </xf:input>
+                <xf:output ref="@id">
+                    <xf:label>id:</xf:label>
+                </xf:output>
+                <xf:select1 ref="@component" appearance="full">
+                    <xf:item>
+                        <xf:label>cross-component</xf:label>
+                        <xf:value>cross-component</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>component1</xf:label>
+                        <xf:value>component1</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>component2</xf:label>
+                        <xf:value>component2</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>unspecified</xf:label>
+                        <xf:value>unspecified</xf:value>
+                    </xf:item>
+                </xf:select1>
+                <xf:select1 ref="@status" appearance="full">
+                    <xf:item>
+                        <xf:label>open</xf:label>
+                        <xf:value>open</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>closed</xf:label>
+                        <xf:value>closed</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>re-opened</xf:label>
+                        <xf:value>re-opened</xf:value>
+                    </xf:item>
+                </xf:select1>
+                <xf:select1 ref="@type" appearance="full">
+                    <xf:item>
+                        <xf:label>bug</xf:label>
+                        <xf:value>bug</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>enhancement</xf:label>
+                        <xf:value>enhancement</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>task</xf:label>
+                        <xf:value>task</xf:value>
+                    </xf:item>
+                </xf:select1>
+                <xf:select1 ref="@priority" appearance="full">
+                    <xf:item>
+                        <xf:label>low</xf:label>
+                        <xf:value>low</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>medium</xf:label>
+                        <xf:value>medium</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>high</xf:label>
+                        <xf:value>high</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>urgent</xf:label>
+                        <xf:value>urgent</xf:value>
+                    </xf:item>
+                </xf:select1>
+                <xf:select1 ref="@milestone" appearance="full">
+                    <xf:item>
+                        <xf:label>mvp</xf:label>
+                        <xf:value>mvp</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>milestone1</xf:label>
+                        <xf:value>milestone1</xf:value>
+                    </xf:item>
+                    <xf:item>
+                        <xf:label>milestone2</xf:label>
+                        <xf:value>milestone2</xf:value>
+                    </xf:item>
+                </xf:select1>
+                <xf:input ref="@assignee">
+                    <xf:label>assignee:</xf:label>
+                </xf:input>
+                <xf:textarea id="textareaSummary" ref="summary" appearance="growing" incremental="true">
+                    <xf:label>summary</xf:label>
+                    <xf:alert>invalid</xf:alert>
+                </xf:textarea>                
+                <xf:textarea id="textareaReproduce" ref="reproduce" appearance="growing" incremental="true">
+                    <xf:label>reproduce</xf:label>
+                    <xf:alert>invalid</xf:alert>
+                </xf:textarea>                
+                <xf:textarea id="textareaResolution" ref="resolution" appearance="growing" incremental="true">
+                    <xf:label>resolution</xf:label>
+                    <xf:alert>invalid</xf:alert>
+                </xf:textarea> 
+                
+                <!-- comments stuff 
+                
+                    The idea is that the first comment will be copied from the summary.
+                    (The summary can be edited/kept up to date, but the first comment is a record
+                     of the original post.)  This happens server-side.  Comments are also time-stamped 
+                    server-side.
+                     
+                    Comments are read-only.
+                    
+                    A new comment is made by writing into the placeholder element;
+                    the action copies that to a new comment.
+                    
+                    You have to press the "Add Comment" button, then "Save"...
+                -->
+                
+                    <xf:repeat nodeset="//issue[index('issue-repeat')]/comments/comment" id="comment-repeat">
+                        <xf:output ref="."/>
+                        <br/>
+                    </xf:repeat>
+                    
+                    
+                    <xf:textarea id="textareaComment" ref="//issue[index('issue-repeat')]/comments/placeholder" appearance="growing" incremental="true">
+                        <xf:label>new comment</xf:label>
+                        <xf:alert>invalid</xf:alert>
+                    </xf:textarea>   
+                                 
+                    
+                    <xf:trigger>
+                        <xf:label>Add Comment</xf:label>
+                        <xf:action ev:event="DOMActivate">
+                            <xf:insert ref="//issue[index('issue-repeat')]/comments/placeholder" origin="instance('new-comment')" at="last()" position="before"/>
+                            <xf:setvalue ref="//issue[index('issue-repeat')]/comments/comment[last()]" value="//issue[index('issue-repeat')]/comments[1]/placeholder/text()"/> 
+                            <xf:setvalue ref="//issue[index('issue-repeat')]/comments/placeholder" value="'placeholder'"/> 
+                        </xf:action>
+                            
+                    </xf:trigger>
+                
+                <!-- end comments stuff -->
+
+
+          
+          
+                <!-- attachments 
+                
+        <attachment filename="38_decracdiscrim1-1" mediatype="application/vnd.openxmlformats-officedocument.wordprocessingml.document" timestamp="1518647465960" storedAs="entries"/>
+                        -->
+                <ul>
+                    <xf:repeat nodeset="//issue[index('issue-repeat')]/attachments/attachment" id="attachment-repeat">
+                        <li>
+                                    <xf:output ref="./@filename"/>
+                            <xf:group ref=".[@storedAs='entries']">
+                               <!-- see https://en.wikibooks.org/wiki/XForms/Output_and_Links -->
+                               
+                               <!-- Doesn't work
+                               <xf:submit submission="docx" appearance="minimal" class="url">
+                                    <xf:label><xf:output ref="./@filename"/></xf:label>
+                               </xf:submit>     
+                               -->
+                               
+                               <!-- works in both betterForm and orbeon -->
+                                <xf:trigger submission="replace-form-with" appearance="minimal" class="url">
+                                    <xf:label>
+                                        <xf:output ref="./@filename"/>
+                                    </xf:label>
+                                    <xf:action ev:event="DOMActivate">
+                                        <xf:setvalue ref="instance('URL-container')" value="concat('http://127.0.0.1:8080/exist/restxq/docx/',                                          instance('all')/issue[index('issue-repeat')]/attachments/attachment/@filename)"/>
+                                        <xf:load ref="instance('URL-container')"/>
+                                    </xf:action>
+                                </xf:trigger>                               
+                               
+                               
+                            </xf:group>
+                        </li>
+                        
+                    </xf:repeat>
+                </ul>    
+                <xf:upload ref="//issue[index('issue-repeat')]/files/file[1]" incremental="true">
+                    <xf:label>Upload for anyURI: </xf:label>
+<!--                  <xf:filename ref="@filename"/>
+                  <xf:mediatype ref="@mediatype"/>-->
+                </xf:upload>                
+
+            </xf:group>
+            <xf:submit submission="save">
+                <xf:label>Save</xf:label>
+            </xf:submit>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
